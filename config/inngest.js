@@ -15,7 +15,7 @@ export const syncUserCreation = inngest.createFunction(
     const { id, first_name, last_name, email_addresses, image_url } = event.data;
 
     const userData = {
-      clerkId: id,
+      _id: id, // Clerk ID becomes Mongo _id
       email: email_addresses?.[0]?.email_address || "",
       name: `${first_name || ""} ${last_name || ""}`.trim(),
       imageUrl: image_url,
@@ -24,7 +24,7 @@ export const syncUserCreation = inngest.createFunction(
     await connectDB();
     await User.create(userData);
 
-    return { message: `✅ User ${id} created in MongoDB` };
+    return { success: true, message: `✅ User ${id} created in MongoDB` };
   }
 );
 
@@ -44,9 +44,9 @@ export const syncUserUpdation = inngest.createFunction(
     };
 
     await connectDB();
-    await User.findOneAndUpdate({ clerkId: id }, userData, { new: true });
+    await User.findByIdAndUpdate(id, userData, { new: true });
 
-    return { message: `🔄 User ${id} updated in MongoDB` };
+    return { success: true, message: `🔄 User ${id} updated in MongoDB` };
   }
 );
 
@@ -60,8 +60,8 @@ export const syncUserDeletion = inngest.createFunction(
     const { id } = event.data;
 
     await connectDB();
-    await User.findOneAndDelete({ clerkId: id });
+    await User.findByIdAndDelete(id);
 
-    return { message: `🗑️ User ${id} deleted from MongoDB` };
+    return { success: true, message: `🗑️ User ${id} deleted from MongoDB` };
   }
 );
